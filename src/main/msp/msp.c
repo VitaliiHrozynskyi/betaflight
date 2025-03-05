@@ -1325,6 +1325,24 @@ case MSP_NAME:
         sbufWriteU16(dst, attitude.values.roll);
         sbufWriteU16(dst, attitude.values.pitch);
         sbufWriteU16(dst, DECIDEGREES_TO_DEGREES(attitude.values.yaw));
+        for (int i = 0; i < 3; i++) {
+            sbufWriteU16(dst, gyroRateDps(i));
+        }
+
+        sbufWriteU32(dst, getEstimatedAltitudeCm());
+#ifdef USE_VARIO
+        sbufWriteU16(dst, getEstimatedVario());
+#else
+        sbufWriteU16(dst, 0);
+#endif
+
+        for (int i = 0; i < rxRuntimeState.channelCount; i++) {
+            float sample;
+            const uint8_t rawChannel = i < RX_MAPPABLE_CHANNEL_COUNT ? rxConfig()->rcmap[i] : i;
+
+            sample = rxRuntimeState.rcReadRawFn(&rxRuntimeState, rawChannel);
+            sbufWriteU16(dst, sample);
+        }
         break;
 
     case MSP_ALTITUDE:
