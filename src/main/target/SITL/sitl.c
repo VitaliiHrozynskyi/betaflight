@@ -246,9 +246,11 @@ static void *udpRCThread(void *data)
         n = udpRecv(&rcLink, &rcPkt, sizeof(rc_packet), 100);
         if (n == sizeof(rc_packet)) {
             if (!rc_received) {
-                printf("[SITL] new rc %d: t:%f AETR: %d %d %d %d AUX1-4: %d %d %d %d\n", n, rcPkt.timestamp,
+                printf("[SITL] new rc %d: t:%f AETR: %d %d %d %d AUX1-12: %d %d %d %d %d %d %d %d %d %d %d %d\n", n, rcPkt.timestamp,
                     rcPkt.channels[0], rcPkt.channels[1],rcPkt.channels[2],rcPkt.channels[3],
-                    rcPkt.channels[4], rcPkt.channels[5],rcPkt.channels[6],rcPkt.channels[7]);
+                    rcPkt.channels[4], rcPkt.channels[5],rcPkt.channels[6],rcPkt.channels[7],
+                    rcPkt.channels[8], rcPkt.channels[9],rcPkt.channels[10],rcPkt.channels[11],
+                    rcPkt.channels[12], rcPkt.channels[13],rcPkt.channels[14],rcPkt.channels[15]);
 
                 rxRuntimeState.channelCount = SIMULATOR_MAX_RC_CHANNELS;
                 rxRuntimeState.rcReadRawFn = readRCSITL;
