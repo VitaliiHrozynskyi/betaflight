@@ -1343,7 +1343,20 @@ case MSP_NAME:
             sample = rxRuntimeState.rcReadRawFn(&rxRuntimeState, rawChannel);
             sbufWriteU16(dst, sample);
         }
-        break;
+            for (unsigned i = 0; i < 8; i++) {
+#ifdef USE_MOTOR
+                if (!motorIsEnabled() || i >= MAX_SUPPORTED_MOTORS || !motorIsMotorEnabled(i)) {
+                    sbufWriteU16(dst, 0);
+                    continue;
+                }
+
+                sbufWriteU16(dst, motorConvertToExternal(motor[i]));
+#else
+                sbufWriteU16(dst, 0);
+#endif
+            }
+
+            break;
 
     case MSP_ALTITUDE:
         sbufWriteU32(dst, getEstimatedAltitudeCm());
