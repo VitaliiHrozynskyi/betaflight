@@ -1343,17 +1343,29 @@ case MSP_NAME:
             sample = rxRuntimeState.rcReadRawFn(&rxRuntimeState, rawChannel);
             sbufWriteU16(dst, sample);
         }
-            for (unsigned i = 0; i < 8; i++) {
-#ifdef USE_MOTOR
-                if (!motorIsEnabled() || i >= MAX_SUPPORTED_MOTORS || !motorIsMotorEnabled(i)) {
-                    sbufWriteU16(dst, 0);
-                    continue;
-                }
+            for (unsigned i = 0; i < getMotorCount(); i++) {
+                int rpm = 0;
+                bool rpmDataAvailable = false;
 
-                sbufWriteU16(dst, motorConvertToExternal(motor[i]));
-#else
-                sbufWriteU16(dst, 0);
+
+#ifdef USE_DSHOT_TELEMETRY
+                if (useDshotTelemetry) {
+                    rpm = lrintf(getDshotRpm(i));
+                    rpmDataAvailable = true;
+                }
 #endif
+
+#ifdef USE_ESC_SENSOR
+                if (featureIsEnabled(FEATURE_ESC_SENSOR)) {
+                    escSensorData_t *escData = getEscSensorData(i);
+                    if (!rpmDataAvailable) {  // We want DSHOT telemetry RPM data (if available) to have precedence
+                        rpm = lrintf(erpmToRpm(escData->rpm));
+                        rpmDataAvailable = true;
+                    }
+                }
+#endif
+
+                sbufWriteU32(dst, (rpmDataAvailable ? rpm : 0));
             }
 
             break;
